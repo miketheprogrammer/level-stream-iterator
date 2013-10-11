@@ -1,5 +1,5 @@
 {
-  "name": "level-iterator",
+  "name": "level-stream-iterator",
   "version": "0.0.1",
   "description": "A Level Up Addon that Implements iterator syntax over a stream.",
   "main": "index.js",
