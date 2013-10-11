@@ -36,7 +36,7 @@ describe('Iterator Class', function(){
     })
 
     describe('Iterator.hasNextSync', function() {
-	it('Should return true if there is another record else false', 
+	it('Should return true if there is another record else false',
 	   function(done){
 	       var iter = new LevelIterator(db)
 	       iter.on('readable', function() {
@@ -62,6 +62,20 @@ describe('Iterator Class', function(){
 			done()
 		    })
 		}, 10)
+	    })
+	})
+
+	it('Should store skipped results in buffer', function(done){
+	    var iter = new LevelIterator(db)
+	    iter.once('readable', function() {
+		setTimeout(function() {
+		    iter.seekSync(1, true)
+		    iter.next(function(err, res) {
+			assert(res.key === '0')
+			assert(res.value === 'string0')
+			done()
+		    })
+		},10)
 	    })
 	})
     })

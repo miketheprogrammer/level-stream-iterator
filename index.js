@@ -1,5 +1,13 @@
 var EventEmitter = require('events').EventEmitter
 var util = require('util')
+
+/*
+ * This API Exposes both Async and Sync Methods.
+ * Sync Methods should be used with caution.
+ * The Iterator class bubbles up some of the events of the underlying
+   stream ( readable, end )
+*/
+
 var LevelIterator = function(opts, db) {
     EventEmitter.call(this)
     if ( typeof opts.put == 'function' ) {
@@ -13,8 +21,10 @@ var LevelIterator = function(opts, db) {
     this.ended = false
    
     this.buffer = []
-    
+
+    //Faster than bind
     var ref = this;
+
     this.readStream.on('readable', function() {
 	ref.readable = true
 	ref.emit('readable')
@@ -29,6 +39,8 @@ var LevelIterator = function(opts, db) {
 util.inherits(LevelIterator, EventEmitter)
 
 LevelIterator.prototype._read = function() {
+    if ( this.buffer.length > 0 )
+	return this.buffer.splice(0,1)[0]
     return this.readStream.read()
 }
 
@@ -63,14 +75,17 @@ LevelIterator.prototype.next = function(cb) {
     this.readStream.once('end', onEnd)
 }
 
-/* 
-This method should not be used unless you know what your are doing
-@refactor to use seek sync
-*/
-LevelIterator.prototype.hasNextSync = function() {
+LevelIterator.prototype._checkReadable = function() {
     if ( this.readable === false )
 	throw new Error('Stream is not readable yet')
+}
+
+
+LevelIterator.prototype.hasNextSync = function() {
+    this._checkReadable()
     while(true){
+	if ( this.ended ) 
+	    return false
 	if ( this.readable ) {
 	    return !this.validateResult(this._read())
 	}
@@ -82,10 +97,10 @@ LevelIterator.prototype.seekSync = function(i, useBuffer) {
     i = (i || 1)
     useBuffer = useBuffer || ( useBuffer = false )
    
-    if ( this.readable === false ) 
-	throw new Error('Stream is not readable yet')
-
-    while( true )
+    this._checkReadable()
+    
+    while( true ) {
+	if ( this.ended ) return false
 	if ( this.readable ) {
 	    for ( var j = 0; j < i; j++){
 		var value = this._read()
@@ -94,6 +109,7 @@ LevelIterator.prototype.seekSync = function(i, useBuffer) {
 	    }
 	    return
 	}
+    }
 }
 
 
