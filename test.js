@@ -111,4 +111,27 @@ describe('Iterator Class', function(){
 	    })
 	})
     })
+
+    describe('Iterator.read', function() {
+	it('Should read 3 values', function(done) {
+	    var iter = new LevelIterator(db)
+	    iter.read(3, function(err, res) {
+		assert(res.length === 3)
+		done()
+	    })
+	})
+	it('Should return results in order', function(done) {
+	    var iter = new LevelIterator(db)
+	    iter.read(3, function(err, res) {
+		assert(res.length === 3)
+		for ( var i = 0; i < 3; i++ ){
+		    var _res = res[i];
+		    assert(_res.key == i)
+		    assert(_res.value == 'string'+i)
+		}
+		done()
+		
+	    })
+	})
+    })
 })

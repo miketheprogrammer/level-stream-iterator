@@ -48,8 +48,20 @@ LevelIterator.prototype.validateResult = function(result){
     return (result === null || result === undefined)
 }
 
-LevelIterator.prototype.read = function() {
-    return this._read();
+LevelIterator.prototype.read = function(i, cb, results) {
+    var results = results || ( results = [] )
+
+    var callback = function(err, res) {
+	if ( err ) return cb(err)
+	    
+	results.push(res)
+
+	if ( i > 0 ) this.read(i, cb, results)
+	else cb(err, results)
+    }
+
+    i -= 1
+    this.next(callback.bind(this))
 }
 
 LevelIterator.prototype.next = function(cb) {
