@@ -86,16 +86,12 @@ LevelIterator.prototype.hasNextSync = function(useBuffer) {
 
     this._checkReadable()
     while(true){
-	if ( this.ended ) 
-	    return false
+	if ( this.ended ) return false
 	if ( this.readable ) {
 	    var value = this._read()
 	    var isValid = !this.validateResult(value)
-	    if ( useBuffer && isValid )
-		this.buffer.push(value)
-
+	    if ( useBuffer && isValid ) this.buffer.push(value)
 	    return isValid
-	    
 	}
     }
 }
