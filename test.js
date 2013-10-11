@@ -83,6 +83,19 @@ describe('Iterator Class', function(){
 
     })
 
+    describe('Iterator.seek', function() {
+	it('Should seek 2 places forward', function(done) {
+	    var iter = new LevelIterator(db)
+	    iter.seek(2, function() {
+		iter.next(function(err, res) {
+		    assert(res.key === '2')
+		    assert(res.value === 'string2')
+		    done()
+		})
+	    })
+	})
+    })
+
     describe('Iterator.seekSync', function() {
 	it('Should seek 2 places forward', function(done) {
 	    var iter = new LevelIterator(db)

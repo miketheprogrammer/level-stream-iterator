@@ -124,5 +124,17 @@ LevelIterator.prototype.seekSync = function(i) {
     }
 }
 
+LevelIterator.prototype.seek = function(i, cb) {
+    var callback = function() {
+	if ( i > 0 )
+	    this.seek(i, cb)
+	else cb(true)
+    }
+
+    i -= 1;
+    this.next(callback.bind(this))
+}
+
+
 
 module.exports = LevelIterator
