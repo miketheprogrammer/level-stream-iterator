@@ -1,0 +1,33 @@
+{
+  "name": "level-iterator",
+  "version": "0.0.1",
+  "description": "A Level Up Addon that Implements iterator syntax over a stream.",
+  "main": "index.js",
+  "scripts": {
+    "test": "./node_modules/mocha/bin/mocha --reporter spec"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/miketheprogrammer/level-iterator.git"
+  },
+  "keywords": [
+    "levelup",
+    "node",
+    "leveldb",
+    "level",
+    "leveldown",
+    "iterator",
+    "syntax",
+    "stream"
+  ],
+  "author": "Michael Hernandez github.com/miketheprogrammer www.miketheprogrammer.com",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/miketheprogrammer/level-iterator/issues"
+  },
+  "devDependencies": {
+    "mocha": "~1.13.0",
+    "levelup": "~0.17.0",
+    "leveldown": "~0.9.1"
+  }
+}
