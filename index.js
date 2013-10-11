@@ -54,7 +54,7 @@ LevelIterator.prototype.read = function() {
 
 LevelIterator.prototype.next = function(cb) {
     if ( this.ended ) return cb(null, undefined)
-    
+
     if ( this.readable ) {
 	var result = this._read();
 	if ( this.validateResult(result)  ) {
@@ -94,6 +94,18 @@ LevelIterator.prototype.hasNextSync = function(useBuffer) {
 	    return isValid
 	}
     }
+}
+
+LevelIterator.prototype.hasNext = function(cb, useBuffer) {
+    useBuffer = useBuffer || ( useBuffer = true )
+    
+    var callback = function(err, res) {
+	if ( useBuffer ) this.buffer.push(res)
+	cb(err, !this.validateResult(res))
+
+    }
+    
+    this.next(callback.bind(this))
 }
 
 

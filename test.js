@@ -35,6 +35,23 @@ describe('Iterator Class', function(){
 	})
     })
 
+    describe('Iterator.hasNext', function() {
+	it('Should return true if there is another record else false',
+	   function(done){
+	       var iter = new LevelIterator(db)
+	       iter.hasNext(function(err, res) {
+		   if ( err ) done(err)
+		   if ( res ) {
+		       iter.next(function(err, res) {
+			   assert(res.key === '0')
+			   assert(res.value === 'string0')
+			   done()
+		       })
+		   }
+	       })
+	   })
+    })
+
     describe('Iterator.hasNextSync', function() {
 	it('Should return true if there is another record else false',
 	   function(done){
@@ -80,10 +97,5 @@ describe('Iterator Class', function(){
 		}, 10)
 	    })
 	})
-
-
     })
 })
-
-
-
