@@ -113,7 +113,7 @@ LevelIterator.prototype.hasNext = function(cb, useBuffer) {
     
     var callback = function(err, res) {
 	if ( useBuffer ) this.buffer.push(res)
-	cb(err, !this.validateResult(res))
+	cb(!this.validateResult(res))
 
     }
     

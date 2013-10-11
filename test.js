@@ -39,8 +39,7 @@ describe('Iterator Class', function(){
 	it('Should return true if there is another record else false',
 	   function(done){
 	       var iter = new LevelIterator(db)
-	       iter.hasNext(function(err, res) {
-		   if ( err ) done(err)
+	       iter.hasNext(function(res) {
 		   if ( res ) {
 		       iter.next(function(err, res) {
 			   assert(res.key === '0')
