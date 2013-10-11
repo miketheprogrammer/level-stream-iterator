@@ -81,31 +81,35 @@ LevelIterator.prototype._checkReadable = function() {
 }
 
 
-LevelIterator.prototype.hasNextSync = function() {
+LevelIterator.prototype.hasNextSync = function(useBuffer) {
+    useBuffer = useBuffer || ( useBuffer = true )
+
     this._checkReadable()
     while(true){
 	if ( this.ended ) 
 	    return false
 	if ( this.readable ) {
-	    return !this.validateResult(this._read())
+	    var value = this._read()
+	    var isValid = !this.validateResult(value)
+	    if ( useBuffer && isValid )
+		this.buffer.push(value)
+
+	    return isValid
+	    
 	}
     }
 }
 
 
-LevelIterator.prototype.seekSync = function(i, useBuffer) {
+LevelIterator.prototype.seekSync = function(i) {
     i = (i || 1)
-    useBuffer = useBuffer || ( useBuffer = false )
-   
-    this._checkReadable()
-    
+
+    this._checkReadable()    
     while( true ) {
 	if ( this.ended ) return false
 	if ( this.readable ) {
 	    for ( var j = 0; j < i; j++){
-		var value = this._read()
-		if ( useBuffer )
-		    this.buffer.push(value)
+		this._read()
 	    }
 	    return
 	}

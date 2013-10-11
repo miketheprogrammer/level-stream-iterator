@@ -41,6 +41,7 @@ describe('Iterator Class', function(){
 	       var iter = new LevelIterator(db)
 	       iter.on('readable', function() {
 		   assert(iter.hasNextSync() === true)
+		   iter.next(function(){})
 	       })
 	       iter.on('end', function() {
 		   assert(iter.hasNextSync() === false)
@@ -48,6 +49,21 @@ describe('Iterator Class', function(){
 	       })
 	       
 	   })
+
+	it('Should store skipped results in buffer', function(done){
+	    var iter = new LevelIterator(db)
+	    iter.once('readable', function() {
+		setTimeout(function() {
+		    iter.hasNextSync()
+		    iter.next(function(err, res) {
+			assert(res.key === '0')
+			assert(res.value === 'string0')
+			done()
+		    })
+		},10)
+	    })
+	})
+
     })
 
     describe('Iterator.seekSync', function() {
@@ -65,19 +81,7 @@ describe('Iterator Class', function(){
 	    })
 	})
 
-	it('Should store skipped results in buffer', function(done){
-	    var iter = new LevelIterator(db)
-	    iter.once('readable', function() {
-		setTimeout(function() {
-		    iter.seekSync(1, true)
-		    iter.next(function(err, res) {
-			assert(res.key === '0')
-			assert(res.value === 'string0')
-			done()
-		    })
-		},10)
-	    })
-	})
+
     })
 })
 
