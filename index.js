@@ -8,13 +8,14 @@ var util = require('util')
    stream ( readable, end )
 */
 
-var LevelIterator = function(opts, db) {
+var LevelIterator = function (opts, db) {
     EventEmitter.call(this)
-    if ( typeof opts.put == 'function' ) {
-	db = opts
-	options = {}
+    var options;
+    if (typeof opts.put === 'function') {
+        db = opts
+        options = {}
     } else {
-	options = {}
+        options = {}
     }
     this.readStream = db.createReadStream(options)
     this.readable = false
@@ -25,38 +26,38 @@ var LevelIterator = function(opts, db) {
     //Faster than bind
     var ref = this;
 
-    this.readStream.on('readable', function() {
-	ref.readable = true
-	ref.emit('readable')
+    this.readStream.on('readable', function () {
+        ref.readable = true
+        ref.emit('readable')
     })
     
-    this.readStream.on('end', function() {
-	this.ended = false
-	ref.emit('end')
+    this.readStream.on('end', function () {
+        this.ended = false
+        ref.emit('end')
     })
 }
 
 util.inherits(LevelIterator, EventEmitter)
 
-LevelIterator.prototype._read = function() {
-    if ( this.buffer.length > 0 )
-	return this.buffer.splice(0,1)[0]
+LevelIterator.prototype._read = function () {
+    if (this.buffer.length > 0)
+        return this.buffer.splice(0, 1)[0]
     return this.readStream.read()
 }
 
-LevelIterator.prototype.validateResult = function(result){
+LevelIterator.prototype.validateResult = function (result) {
     return (result === null || result === undefined)
 }
 
-LevelIterator.prototype.read = function(i, cb, results) {
-    var results = results || ( results = [] )
+LevelIterator.prototype.read = function (i, cb, results) {
+    results = results || (results = [])
 
-    var callback = function(err, res) {
-	if ( err ) return cb(err)
-	    
-	results.push(res)
+    var callback = function (err, res) {
+        if (err) return cb(err)
 
-	if ( i > 0 ) this.read(i, cb, results)
+        results.push(res)
+
+        if (i > 0) this.read(i, cb, results)
 	else cb(err, results)
     }
 
@@ -64,82 +65,83 @@ LevelIterator.prototype.read = function(i, cb, results) {
     this.next(callback.bind(this))
 }
 
-LevelIterator.prototype.next = function(cb) {
-    if ( this.ended ) return cb(null, undefined)
+LevelIterator.prototype.next = function (cb) {
+    if (this.ended) return cb(null, undefined)
 
-    if ( this.readable ) {
-	var result = this._read();
-	if ( this.validateResult(result)  ) {
-	    this.readable = false
-	    return this.next(cb)
-	}
-	return cb(null, result)
+    if (this.readable) {
+        var result = this._read();
+        if (this.validateResult(result)) {
+            this.readable = false
+            return this.next(cb)
+        }
+        return cb(null, result)
     }
 
     var ref = this;
-    var onEnd = function() { ref.next(cb) }
+    var onEnd = function () { ref.next(cb) }
 	
-    this.readStream.once('readable', function() {
-	ref.readable = true
-	ref.readStream.removeListener('end', onEnd)
-	ref.next(cb)
+    this.readStream.once('readable', function () {
+        ref.readable = true
+        ref.readStream.removeListener('end', onEnd)
+        ref.next(cb)
     })
     this.readStream.once('end', onEnd)
 }
 
-LevelIterator.prototype._checkReadable = function() {
-    if ( this.readable === false )
-	throw new Error('Stream is not readable yet')
-}
-
-
-LevelIterator.prototype.hasNextSync = function(useBuffer) {
-    useBuffer = useBuffer || ( useBuffer = true )
-
-    this._checkReadable()
-    while(true){
-	if ( this.ended ) return false
-	if ( this.readable ) {
-	    var value = this._read()
-	    var isValid = !this.validateResult(value)
-	    if ( useBuffer && isValid ) this.buffer.push(value)
-	    return isValid
-	}
+LevelIterator.prototype._checkReadable = function (cb) {
+    if (this.readable === false) {
+        var err = new Error('Stream is not readable yet')
+        if (cb !== undefined) cb(err)
+        else throw err
     }
 }
 
-LevelIterator.prototype.hasNext = function(cb, useBuffer) {
-    useBuffer = useBuffer || ( useBuffer = true )
-    
-    var callback = function(err, res) {
-	if ( useBuffer ) this.buffer.push(res)
-	cb(!this.validateResult(res))
 
+LevelIterator.prototype.hasNextSync = function (useBuffer) {
+    useBuffer = useBuffer || (useBuffer = true)
+
+    this._checkReadable()
+    while (true) {
+        if (this.ended) return false
+        if (this.readable) {
+            var value = this._read()
+            var isValid = !this.validateResult(value)
+            if (useBuffer && isValid) this.buffer.push(value)
+            return isValid
+        }
+    }
+}
+
+LevelIterator.prototype.hasNext = function (cb, useBuffer) {
+    useBuffer = useBuffer || (useBuffer = true)
+    
+    var callback = function (err, res) {
+        if (useBuffer) this.buffer.push(res)
+        cb(!this.validateResult(res))
     }
     
     this.next(callback.bind(this))
 }
 
 
-LevelIterator.prototype.seekSync = function(i) {
+LevelIterator.prototype.seekSync = function (i) {
     i = (i || 1)
 
-    this._checkReadable()    
-    while( true ) {
-	if ( this.ended ) return false
-	if ( this.readable ) {
-	    for ( var j = 0; j < i; j++){
-		this._read()
-	    }
-	    return
-	}
+    this._checkReadable()
+    while (true) {
+        if (this.ended) return false
+        if (this.readable) {
+            for (var j = 0; j < i; j += 1) {
+                this._read()
+            }
+            return false;
+        }
     }
 }
 
-LevelIterator.prototype.seek = function(i, cb) {
-    var callback = function() {
-	if ( i > 0 )
-	    this.seek(i, cb)
+LevelIterator.prototype.seek = function (i, cb) {
+    var callback = function () {
+        if (i > 0) this.seek(i, cb)
 	else cb(true)
     }
 
