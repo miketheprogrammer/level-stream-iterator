@@ -126,7 +126,7 @@ describe('Iterator Class', function () {
                 assert(res.length === 3)
                 for (var i = 0; i < 3; i += 1) {
                     var _res = res[i];
-                    assert(_res.key === i)
+                    assert(parseInt(_res.key) === i)
                     assert(_res.value === 'string' + i)
                 }
                 done()
